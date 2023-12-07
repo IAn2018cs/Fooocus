@@ -140,6 +140,7 @@ def worker():
         performance_selection = args.pop()
         aspect_ratios_selection = args.pop()
         image_number = args.pop()
+        step_number = args.pop()
         image_seed = args.pop()
         sharpness = args.pop()
         guidance_scale = args.pop()
@@ -184,9 +185,12 @@ def worker():
             print(f'Refiner disabled because base model and refiner are same.')
             refiner_model_name = 'None'
 
-        assert performance_selection in ['Speed', 'Quality', 'Extreme Speed']
+        assert performance_selection in ['Customize', 'Speed', 'Quality', 'Extreme Speed']
 
         steps = 30
+
+        if performance_selection == 'Customize':
+            steps = step_number
 
         if performance_selection == 'Speed':
             steps = 30
