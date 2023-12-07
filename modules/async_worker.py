@@ -71,11 +71,12 @@ def worker():
         return img
 
     def yield_result(async_task, imgs, do_not_show_finished_images=False):
+        global cn_face_img
         if not isinstance(imgs, list):
             imgs = [imgs]
 
         async_task.results = async_task.results + [swap_face(img) for img in imgs]
-
+        cn_face_img = None
         if do_not_show_finished_images:
             return
 
