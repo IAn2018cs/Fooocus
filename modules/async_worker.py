@@ -59,8 +59,9 @@ def worker():
         async_task.yields.append(['preview', (number, text, None)])
 
     def swap_face(img):
+        global cn_face_img
         source_file = None
-        if cn_face_img:
+        if cn_face_img is not None:
             source_file = save_temp_file(cn_face_img)
         if source_file:
             target_file_path = save_temp_file(img)
