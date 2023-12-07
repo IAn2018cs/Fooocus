@@ -165,3 +165,22 @@ def get_files_from_folder(folder_path, exensions=None, name_filter=None):
                 filenames.append(path)
 
     return sorted(filenames, key=lambda x: -1 if os.sep in x else 1)
+
+def create_temp_file() -> str:
+    date_string, abspath, filename = generate_temp_filename()
+    os.makedirs(os.path.dirname(abspath), exist_ok=True)
+    open(abspath, 'x')
+    return abspath
+
+def save_temp_file(img: np.ndarray) -> str:
+    date_string, abspath, filename = generate_temp_filename()
+    os.makedirs(os.path.dirname(abspath), exist_ok=True)
+    Image.fromarray(img).save(abspath)
+    return abspath
+
+def read_input_image(file_path: str) -> np.ndarray | None:
+    if not os.path.exists(file_path) or not os.path.isfile(file_path):
+        return None
+    pil_image = Image.open(file_path)
+    image = np.array(pil_image)
+    return image

@@ -9,6 +9,7 @@ class AsyncTask:
 
 
 async_tasks = []
+cn_face_img = None
 
 
 def worker():
@@ -41,6 +42,8 @@ def worker():
     from modules.util import remove_empty_str, HWC3, resize_image, \
         get_image_shape_ceil, set_image_shape_ceil, get_shape_ceil, resample_image
     from modules.upscaler import perform_upscale
+    from modules.util import save_temp_file, read_input_image, create_temp_file
+    from facefusion.core import run
 
     try:
         async_gradio_app = shared.gradio_root
@@ -55,11 +58,23 @@ def worker():
         print(f'[Fooocus] {text}')
         async_task.yields.append(['preview', (number, text, None)])
 
+    def swap_face(img):
+        source_file = None
+        if cn_face_img:
+            source_file = save_temp_file(cn_face_img)
+        if source_file:
+            target_file_path = save_temp_file(img)
+            output_file_path = create_temp_file()
+            new_img_path = run(source_file, target_file_path, output_file_path)
+            if new_img_path:
+                return read_input_image(new_img_path)
+        return img
+
     def yield_result(async_task, imgs, do_not_show_finished_images=False):
         if not isinstance(imgs, list):
             imgs = [imgs]
 
-        async_task.results = async_task.results + imgs
+        async_task.results = async_task.results + [swap_face(img) for img in imgs]
 
         if do_not_show_finished_images:
             return
@@ -140,6 +155,7 @@ def worker():
         inpaint_additional_prompt = args.pop()
 
         cn_tasks = {x: [] for x in flags.ip_list}
+        global cn_face_img
         for _ in range(4):
             cn_img = args.pop()
             cn_stop = args.pop()
@@ -147,6 +163,8 @@ def worker():
             cn_type = args.pop()
             if cn_img is not None:
                 cn_tasks[cn_type].append([cn_img, cn_stop, cn_weight])
+                if cn_type == flags.cn_ip_face:
+                    cn_face_img = cn_img
 
         outpaint_selections = [o.lower() for o in outpaint_selections]
         base_model_additional_loras = []
