@@ -169,7 +169,6 @@ def get_files_from_folder(folder_path, exensions=None, name_filter=None):
 def create_temp_file() -> str:
     date_string, abspath, filename = generate_temp_filename()
     os.makedirs(os.path.dirname(abspath), exist_ok=True)
-    open(abspath, 'x')
     return abspath
 
 def save_temp_file(img: np.ndarray) -> str:
