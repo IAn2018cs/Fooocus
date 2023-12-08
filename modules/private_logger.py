@@ -1,6 +1,7 @@
 import os
 import args_manager
 import modules.config
+import time
 
 from PIL import Image
 from modules.util import generate_temp_filename
@@ -20,6 +21,7 @@ def log(img, dic, single_line_number=3):
     if args_manager.args.disable_image_log:
         return
 
+    execution_start_time = time.perf_counter()
     date_string, local_temp_filename, only_name = generate_temp_filename(folder=modules.config.path_outputs, extension='png')
     os.makedirs(os.path.dirname(local_temp_filename), exist_ok=True)
     Image.fromarray(img).save(local_temp_filename)
@@ -54,4 +56,6 @@ def log(img, dic, single_line_number=3):
 
     log_cache[html_name] = existing_log
 
+    execution_time = time.perf_counter() - execution_start_time
+    print(f'write log time: {execution_time:.2f} seconds')
     return
