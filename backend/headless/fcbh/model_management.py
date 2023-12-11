@@ -4,6 +4,7 @@ from fcbh.cli_args import args
 import fcbh.utils
 import torch
 import sys
+import time
 
 class VRAMState(Enum):
     DISABLED = 0    #No vram present: no need to move models to vram
@@ -328,6 +329,7 @@ def unload_model_clones(model):
         current_loaded_models.pop(i).model_unload()
 
 def free_memory(memory_required, device, keep_loaded=[]):
+    execution_start_time = time.perf_counter()
     unloaded_model = False
     for i in range(len(current_loaded_models) -1, -1, -1):
         if not DISABLE_SMART_MEMORY:
@@ -348,6 +350,8 @@ def free_memory(memory_required, device, keep_loaded=[]):
             mem_free_total, mem_free_torch = get_free_memory(device, torch_free_too=True)
             if mem_free_torch > mem_free_total * 0.25:
                 soft_empty_cache()
+    execution_time = time.perf_counter() - execution_start_time
+    print(f'free memory time: {execution_time:.2f} seconds')
 
 def load_models_gpu(models, memory_required=0):
     global vram_state
