@@ -67,7 +67,7 @@ def worker():
         if source_file:
             target_file_path = save_temp_file(img)
             output_file_path = create_temp_file()
-            new_img_path = run(source_file, target_file_path, output_file_path)
+            new_img_path = run([source_file], target_file_path, output_file_path, provider='cuda')
             if new_img_path:
                 return read_input_image(new_img_path)
         return img
