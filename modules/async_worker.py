@@ -15,6 +15,7 @@ cn_face_img = None
 def worker():
     global async_tasks
 
+    import os
     import traceback
     import math
     import numpy as np
@@ -43,8 +44,9 @@ def worker():
     from modules.util import remove_empty_str, HWC3, resize_image, \
         get_image_shape_ceil, set_image_shape_ceil, get_shape_ceil, resample_image, erode_or_dilate, ordinal_suffix
     from modules.upscaler import perform_upscale
-    from modules.util import save_temp_file, read_input_image, create_temp_file
-    from facefusion.core import run
+    from modules.util import save_temp_file, read_input_image
+    from facefusionlib import swapper
+    from facefusionlib.swapper import DeviceProvider
 
     try:
         async_gradio_app = shared.gradio_root
@@ -60,16 +62,28 @@ def worker():
         async_task.yields.append(['preview', (number, text, None)])
 
     def swap_face(img):
+        tmp_paths = []
         global cn_face_img
         source_file = None
         if cn_face_img is not None:
             source_file = save_temp_file(cn_face_img)
+            tmp_paths.append(source_file)
         if source_file:
             target_file_path = save_temp_file(img)
-            output_file_path = create_temp_file()
-            new_img_path = run([source_file], target_file_path, output_file_path, provider='cuda')
-            if new_img_path:
-                return read_input_image(new_img_path)
+            tmp_paths.append(target_file_path)
+            result = swapper.swap_face(
+                source_paths=[source_file],
+                target_path=target_file_path,
+                provider=DeviceProvider.GPU
+            )
+            tmp_paths.append(result)
+            if result:
+                return read_input_image(result)
+        for tmp in tmp_paths:
+            try:
+                os.remove(tmp)
+            except Exception as e:
+                print(f"[Fooocus] delete tmp file error: {e}")
         return img
 
     def yield_result(async_task, imgs, do_not_show_finished_images=False):
