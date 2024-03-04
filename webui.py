@@ -578,7 +578,7 @@ with shared.gradio_root:
         ctrls = [currentTask, generate_image_grid]
         ctrls += [
             prompt, negative_prompt, style_selections,
-            performance_selection, aspect_ratios_selection, image_number, step_number, output_format, image_seed, sharpness, guidance_scale
+            performance_selection, aspect_ratios_selection, image_number, output_format, image_seed, sharpness, guidance_scale
         ]
 
         ctrls += [base_model, refiner_model, refiner_switch] + lora_ctrls
