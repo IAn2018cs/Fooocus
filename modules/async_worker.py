@@ -176,7 +176,6 @@ def worker():
         performance_selection = Performance(args.pop())
         aspect_ratios_selection = args.pop()
         image_number = args.pop()
-        step_number = args.pop()
         output_format = args.pop()
         image_seed = args.pop()
         sharpness = args.pop()

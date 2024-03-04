@@ -260,7 +260,6 @@ with shared.gradio_root:
                                                    value=modules.config.default_aspect_ratio, info='width × height',
                                                    elem_classes='aspect_ratios')
                 image_number = gr.Slider(label='Image Number', minimum=1, maximum=modules.config.default_max_image_number, step=1, value=modules.config.default_image_number)
-                step_number = gr.Slider(label='Steps', minimum=1, maximum=60, step=1, value=4)
 
                 output_format = gr.Radio(label='Output Format',
                                             choices=modules.flags.output_formats,
