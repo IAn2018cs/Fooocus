@@ -14,6 +14,7 @@ class AsyncTask:
 
 async_tasks = []
 cn_face_img = None
+swap_face_output_format = "png"
 
 
 def worker():
@@ -51,7 +52,7 @@ def worker():
     from modules.upscaler import perform_upscale
     from modules.flags import Performance
     from modules.meta_parser import get_metadata_parser, MetadataScheme
-    from modules.util import save_temp_file, read_input_image
+    from modules.util import save_temp_file, create_temp_file
     from facefusionlib import swapper
     from facefusionlib.swapper import DeviceProvider
 
@@ -71,30 +72,31 @@ def worker():
         print(f'[Fooocus] {text}')
         async_task.yields.append(['preview', (number, text, None)])
 
-    def swap_face(img):
+    def swap_face(img_path):
         tmp_paths = []
         global cn_face_img
         source_file = None
         if cn_face_img is not None:
-            source_file = save_temp_file(cn_face_img)
+            source_file = save_temp_file(cn_face_img, extension=swap_face_output_format)
             tmp_paths.append(source_file)
         if source_file:
-            target_file_path = save_temp_file(img)
+            target_file_path = img_path
             tmp_paths.append(target_file_path)
+            output_path = create_temp_file(extension=swap_face_output_format)
             result = swapper.swap_face(
                 source_paths=[source_file],
                 target_path=target_file_path,
+                output_path=output_path,
                 provider=DeviceProvider.GPU
             )
-            tmp_paths.append(result)
             if result:
-                return read_input_image(result)
+                return result
         for tmp in tmp_paths:
             try:
                 os.remove(tmp)
             except Exception as e:
                 print(f"[Fooocus] delete tmp file error: {e}")
-        return img
+        return img_path
 
     def yield_result(async_task, imgs, do_not_show_finished_images=False):
         global cn_face_img
@@ -232,6 +234,9 @@ def worker():
 
         save_metadata_to_images = args.pop() if not args_manager.args.disable_metadata else False
         metadata_scheme = MetadataScheme(args.pop()) if not args_manager.args.disable_metadata else MetadataScheme.FOOOCUS
+
+        global swap_face_output_format
+        swap_face_output_format = output_format
 
         cn_tasks = {x: [] for x in flags.ip_list}
         global cn_face_img

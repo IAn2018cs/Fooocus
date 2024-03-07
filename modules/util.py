@@ -361,13 +361,13 @@ def makedirs_with_log(path):
     except OSError as error:
         print(f'Directory {path} could not be created, reason: {error}')
 
-def create_temp_file() -> str:
-    date_string, abspath, filename = generate_temp_filename()
+def create_temp_file(extension='png') -> str:
+    date_string, abspath, filename = generate_temp_filename(extension=extension)
     os.makedirs(os.path.dirname(abspath), exist_ok=True)
     return abspath
 
-def save_temp_file(img: np.ndarray) -> str:
-    date_string, abspath, filename = generate_temp_filename()
+def save_temp_file(img: np.ndarray, extension='png') -> str:
+    date_string, abspath, filename = generate_temp_filename(extension=extension)
     os.makedirs(os.path.dirname(abspath), exist_ok=True)
     Image.fromarray(img).save(abspath)
     return abspath
